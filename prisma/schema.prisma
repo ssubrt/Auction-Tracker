@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Publisher {
+  id        String     @id @default(uuid())
+  name      String
+  adSlots   AdSlot[]
+  requests  AdRequest[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model AdSlot {
+  id          String     @id @default(uuid())
+  name        String
+  type        String     // banner, video, native
+  size        String     // 300x250, 728x90, etc.
+  publisherId String
+  publisher   Publisher  @relation(fields: [publisherId], references: [id])
+  requests    AdRequest[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Dsp {
+  id             String     @id @default(uuid())
+  name           String
+  targetingRules Json       // Store targeting rules as JSON
+  bids           Bid[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model AdRequest {
+  id           String    @id @default(uuid())
+  publisherId  String
+  publisher    Publisher @relation(fields: [publisherId], references: [id])
+  adSlotId     String
+  adSlot       AdSlot    @relation(fields: [adSlotId], references: [id])
+  geo          String
+  device       String
+  requestTime  DateTime  @default(now())
+  bids         Bid[]
+  winningBid   Bid?      @relation("WinningBid", fields: [winningBidId], references: [id])
+  winningBidId String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Bid {
+  id          String     @id @default(uuid())
+  dspId       String
+  dsp         Dsp        @relation(fields: [dspId], references: [id])
+  adRequestId String
+  adRequest   AdRequest  @relation(fields: [adRequestId], references: [id])
+  bidPrice    Float
+  imageUrl    String
+  clickUrl    String
+  winningBid  AdRequest? @relation("WinningBid")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
