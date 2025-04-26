@@ -120,7 +120,7 @@ async function main() {
     // Generate bids from DSPs
     const bids = [];
     for (const dsp of dsps) {
-      const targetingRules = JSON.parse(dsp.targetingRules as string);
+      const targetingRules = JSON.parse(dsp.targetingRules);
       
       // Check if DSP targets this geo and device
       if (targetingRules.geos.includes(geo) && targetingRules.devices.includes(device)) {
